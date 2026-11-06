@@ -210,3 +210,27 @@ MANAGED_ID=$(az aks show -g $RESOURCE_GROUP -n $CLUSTER_NAME --query "identity.p
 az role assignment create --assignee $MANAGED_ID --role "Network Contributor" --scope $VNET_ID
 
 az network public-ip list --resource-group "MC_WorkloadIdentityKVCSIRG_wikvcsilab_centralus" --query "[].{Name:name, IP:ipAddress, IPVersion:ipVersion}" -o table
+
+kubectl kustomize argocd/prod
+
+kubectl kustomize argocd/prod
+kubectl kustomize ingress-nginx/prod
+
+kubectl apply -k argocd/prod
+
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+
+helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+  --namespace ingress-nginx \
+  --create-namespace \
+  --set controller.extraArgs.default-ssl-certificate=ingress-nginx/default-tls \
+  --set controller.replicaCount=2 \
+  --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path"="/healthz" \
+  --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-ipv4"="57.165.167.88" \
+  --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-dns-label-name"="david-argocd-lab"
+
+kubectl annotate ingress argocd-server-ingress -n argocd --overwrite nginx.ingress.kubernetes.io/backend-protocol="HTTPS"
+
+admin
+Pds6WUXzgURjxMXh

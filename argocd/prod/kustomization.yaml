@@ -13,6 +13,12 @@ patches:
     - op: replace
       path: /spec/rules/0/host
       value: david-argocd-lab.centralus.cloudapp.azure.com
+    # 💡 在这里新增：为 Ingress 加上 tls 配置，监听 443 端口
+    - op: add
+      path: /spec/tls
+      value:
+        - hosts:
+            - david-argocd-lab.centralus.cloudapp.azure.com
 
 patchesStrategicMerge:
   # Apply Azure SAML auth/RBAC

@@ -12,6 +12,7 @@ helmCharts:
       extraArgs:
         # Secret where the default ingress TLS cert (wildcard) lives: <namespace>/<secret_name>
         default-ssl-certificate: ingress-nginx/default-tls
+        enable-ssl-passthrough: "true"
       replicaCount: 2
       service:
         annotations:
@@ -24,14 +25,3 @@ helmCharts:
 resources:
   # Front the ingress controller with an IPv6 LoadBalancer Service
   - service-ingress-nginx-controller-ipv6.yaml
-
-patches:
-# Enable passthrough for Argo CD (no Helm value for this, so doing it here)
-# See https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/#option-1-ssl-passthrough
-- target:
-    kind: Deployment
-    name: ingress-nginx-controller
-  patch: |-
-    - op: add
-      path: /spec/template/spec/containers/0/args/-
-      value: "--enable-ssl-passthrough"
