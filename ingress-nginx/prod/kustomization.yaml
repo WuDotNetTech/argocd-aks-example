@@ -8,15 +8,11 @@ patches:
 # Apply the static IP addresses
 - target:
     kind: Service
-    name: ingress-nginx-controller-ipv6
-  patch: |-
-    - op: replace
-      path: /metadata/annotations/service.beta.kubernetes.io~1azure-load-balancer-ipv6
-      value: "2620:12a:C0A3:3::254"
-- target:
-    kind: Service
     name: ingress-nginx-controller
   patch: |-
     - op: replace
       path: /metadata/annotations/service.beta.kubernetes.io~1azure-load-balancer-ipv4
-      value: "10.200.0.254"
+      value: "57.165.167.88"
+    - op: add
+      path: /metadata/annotations/service.beta.kubernetes.io~1azure-dns-label-name
+      value: "david-argocd-lab"

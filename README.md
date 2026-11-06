@@ -177,3 +177,36 @@ argocd repo add https://github.com/TedSpinks/aks-argocd-example --username MySer
 ```
 
 #### 10. Connect to the Argo CD UI and watch it deploy the other apps
+
+
+
+RG=WorkloadIdentityKVCSIRG
+LOC=centralus
+CLUSTER_NAME=wikvcsilab
+UNIQUE_ID=$CLUSTER_NAME$RANDOM
+KEY_VAULT_NAME=$UNIQUE_ID
+
+# Create the resource group
+az group create -g $RG -l $LOC
+
+# Create the cluster with the OIDC Issuer and Workload Identity enabled
+az aks create -g $RG -n $CLUSTER_NAME \
+--node-count 1 \
+--enable-oidc-issuer \
+--enable-workload-identity \
+--enable-addons azure-keyvault-secrets-provider \
+--generate-ssh-keys
+
+# Get the cluster credentials
+az aks get-credentials -g $RG -n $CLUSTER_NAME
+
+
+az aks update -g $RG -n $CLUSTER_NAME --enable-vpa
+
+RESOURCE_GROUP=$RG
+VNET_ID="//subscriptions/19403b59-d03f-48ac-98b5-b90898177e10/resourceGroups/MC_WorkloadIdentityKVCSIRG_wikvcsilab_centralus/providers/Microsoft.Network/virtualNetworks/aks-vnet-33660957"
+
+MANAGED_ID=$(az aks show -g $RESOURCE_GROUP -n $CLUSTER_NAME --query "identity.principalId" --output tsv)
+az role assignment create --assignee $MANAGED_ID --role "Network Contributor" --scope $VNET_ID
+
+az network public-ip list --resource-group "MC_WorkloadIdentityKVCSIRG_wikvcsilab_centralus" --query "[].{Name:name, IP:ipAddress, IPVersion:ipVersion}" -o table

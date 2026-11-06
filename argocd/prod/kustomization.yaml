@@ -12,7 +12,7 @@ patches:
   patch: |-
     - op: replace
       path: /spec/rules/0/host
-      value: argocd.example.com
+      value: david-argocd-lab.centralus.cloudapp.azure.com
 
 patchesStrategicMerge:
   # Apply Azure SAML auth/RBAC
